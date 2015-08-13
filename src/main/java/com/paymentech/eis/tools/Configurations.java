@@ -66,215 +66,198 @@
 package com.paymentech.eis.tools;
 
 // Standard Java imports
-import java.util.*;
-import java.io.*;
-import com.paymentech.eis.tools.Debug;
+
+import java.util.Enumeration;
+import java.util.Properties;
+import java.util.PropertyResourceBundle;
+import java.util.Vector;
 
 /**
  * This class encapsulates all the configurations needed by a Configurable
  * class to work.
  *
- * @author 	Jeff Palmiero
+ * @author Jeff Palmiero
  * @version $Revision:   1.1  $
-*/
-public class Configurations extends Properties
-{
-	///////////////////////////////////////////////////////////////////////
-	// Member variables
-	///////////////////////////////////////////////////////////////////////
+ */
+public class Configurations extends Properties {
+  ///////////////////////////////////////////////////////////////////////
+  // Member variables
+  ///////////////////////////////////////////////////////////////////////
 
-    private String baseName;
+  private String baseName;
 
 
-	///////////////////////////////////////////////////////////////////////
-	// Constructors
-	///////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////
+  // Constructors
+  ///////////////////////////////////////////////////////////////////////
 
-    /**
-     * CT - Default constructor. Initialize the base clas.
-    */
-    public Configurations ()
-	{
-        super ();
+  /**
+   * CT - Default constructor. Initialize the base clas.
+   */
+  public Configurations() {
+    super();
+  }
+
+  /**
+   * Create the class from a the file.
+   *
+   * @params file -		file name to load
+   * @throws Exception
+   */
+  public Configurations(String file) throws Exception {
+    this(file, null);
+  }
+
+  /**
+   * Create the class with given defaults and from the property file located in the class path.
+   * As long as the properties file is in the class path, the getBundle method of propertyResourceBundle
+   * will locate the file.
+   *
+   * @params file -		file name to load
+   * @params config -		default configurartion
+   * @throws Exception
+   */
+  public Configurations(String file, Configurations defaults)
+      throws Exception {
+    this(defaults);
+
+    String base_name = file.substring(0, file.lastIndexOf('.'));
+    PropertyResourceBundle bundle =
+        (PropertyResourceBundle) PropertyResourceBundle.getBundle(base_name);
+
+    String next_key;
+
+    for (Enumeration e = bundle.getKeys(); e.hasMoreElements(); ) {
+      next_key = (String) e.nextElement();
+
+      String next_value = bundle.getString(next_key);
+
+      // setProperty not supported in jdk 1.1, so use put method out
+      // of the hashTable.
+      //setProperty(next_key,next_value);
+      put(next_key, next_value);
     }
 
-    /**
-     * Create the class from a the file.
-	 *
-	 * @params		file 		-		file name to load
-	 * @throws		Exception
-    */
-    public Configurations (String file) throws Exception
-	{
-        this (file, null);
+    //Print out the properties
+    if (Debug.getVerboseMode())
+      list(System.out);
+
+  }
+
+  /**
+   * Create the class with given defaults.
+   *
+   * @params config -		default configurartion
+   */
+  public Configurations(Configurations config) {
+    super(config);
+  }
+
+  /**
+   * Set the configuration
+   *
+   * @params key -		key to set
+   * @params value -		the value
+   */
+  public void set(String key, Object value) {
+    super.put(key, value);
+  }
+
+  /**
+   * Get the configuration.
+   *
+   * @params key -		key to set
+   * @returns value    -		value as an Object
+   */
+  public Object get(String key) {
+    return super.get(key);
+  }
+
+  /**
+   * Get the configuration and use the given default value if not found.
+   *
+   * @params key -		key to set
+   * @params def -		the default value
+   */
+  public Object get(String key, Object def) {
+    Object o = super.get(key);
+
+    return ((o == null) ? def : o);
+  }
+
+  /**
+   * Get the configuration, throw an exception if not present.
+   *
+   * @params key -		key to set
+   * @returns Object    -		value as an Object
+   */
+  public Object getNotNull(String key) {
+    Object o = super.get(key);
+
+    if (o == null) {
+      RuntimeException ex =
+          new RuntimeException("Configuration item '" + ((baseName ==
+              null) ? "" : baseName + "." + key) + "' is not set");
+
+      throw (ex);    // let someone know !!!
     }
 
-    /**
-     * Create the class with given defaults and from the property file located in the class path.
-	 * As long as the properties file is in the class path, the getBundle method of propertyResourceBundle
-	 * will locate the file.
-     *
-	 * @params		file 		-		file name to load
-	 * @params		config 		-		default configurartion
-	 * @throws		Exception
-    */
-    public Configurations (String file, Configurations defaults)
-		throws Exception
-	{
-        this (defaults);
+    return (o);
+  }
 
-		String base_name = file.substring(0,file.lastIndexOf('.'));
-		PropertyResourceBundle bundle =
-                (PropertyResourceBundle) PropertyResourceBundle.getBundle (base_name);
+  /**
+   * Get a vector of configurations when the syntax is incremental
+   *
+   * @params key -		key to set
+   * @returns configurations  -		vector of configurations
+   */
+  public Vector getVector(String key) {
+    Vector v = new Vector();
 
-		String next_key;
+    for (int i = 0; ; i++) {
+      Object n = get(key + "." + i);
 
-		for (Enumeration e = bundle.getKeys();  e.hasMoreElements() ;)
- 	    {
-			next_key = (String)e.nextElement();
+      if (n == null)
+        break;
 
-			String next_value = bundle.getString (next_key);
-
-			// setProperty not supported in jdk 1.1, so use put method out
-			// of the hashTable.
-			//setProperty(next_key,next_value);
-			put (next_key, next_value);
-		}
-
-		//Print out the properties
-		if (Debug.getVerboseMode())
-                  list(System.out);
-
+      v.addElement(n);
     }
 
-    /**
-     * Create the class with given defaults.
-	 *
-	 * @params		config 		-		default configurartion
-    */
-    public Configurations (Configurations config)
-	{
-        super (config);
+    return (v);
+  }
+
+  /**
+   * Create a subconfiguration starting from the base node.
+   *
+   * @params base    -		name of level to strip off
+   */
+  public Configurations getConfigurations(String base) {
+    Configurations c = new Configurations();
+    c.basename((baseName == null) ? base : baseName + "." + base);
+
+    String prefix = base + ".";
+
+    Enumeration keys = this.propertyNames();
+
+    while (keys.hasMoreElements()) {
+      String key = (String) keys.nextElement();
+
+      if (key.startsWith(prefix)) {
+        c.set(key.substring(prefix.length()), this.get(key));
+      } else if (key.equals(base)) {
+        c.set("", this.get(key));
+      }
     }
 
-    /**
-     * Set the configuration
-	 *
-	 * @params		key 		-		key to set
-	 * @params		value 		-		the value
-    */
-    public void set (String key, Object value)
-	{
-        super.put (key, value);
-    }
+    return (c);
+  }
 
-    /**
-     * Get the configuration.
-	 *
-	 * @params		key 		-		key to set
-	 * @returns		value		-		value as an Object
-    */
-    public Object get (String key)
-	{
-        return super.get (key);
-    }
-
-    /**
-     * Get the configuration and use the given default value if not found.
-	 *
-	 * @params		key 		-		key to set
-	 * @params		def 		-		the default value
-    */
-    public Object get (String key, Object def)
-	{
-        Object o = super.get (key);
-
-        return ((o == null) ? def : o);
-    }
-
-    /**
-     * Get the configuration, throw an exception if not present.
-	 *
-	 * @params		key 		-		key to set
-	 * @returns		Object		-		value as an Object
-    */
-    public Object getNotNull (String key)
-	{
-        Object o = super.get (key);
-
-        if (o == null)
-			{
-			RuntimeException ex =
-				new RuntimeException ("Configuration item '" + ((baseName ==
-					null) ? "" : baseName + "." + key) + "' is not set");
-
-			throw (ex);		// let someone know !!!
-        	}
-
-		return (o);
-    }
-
-    /**
-     * Get a vector of configurations when the syntax is incremental
-	 *
-	 * @params		key 			-		key to set
-	 * @returns		configurations	-		vector of configurations
-    */
-    public Vector getVector (String key)
-	{
-        Vector v = new Vector ();
-
-        for (int i = 0; ; i++)
-			{
-            Object n = get (key + "." + i);
-
-            if (n == null)
-				break;
-
-            v.addElement (n);
-        	}
-
-        return (v);
-    }
-
-    /**
-     * Create a subconfiguration starting from the base node.
-	 *
-	 * @params	base		-		name of level to strip off
-    */
-    public Configurations getConfigurations (String base)
-	{
-        Configurations c = new Configurations ();
-        c.basename ((baseName == null) ? base : baseName + "." + base);
-
-    	String prefix = base + ".";
-
-        Enumeration keys = this.propertyNames ();
-
-        while (keys.hasMoreElements())
-			{
-            String key = (String) keys.nextElement ();
-
-			if (key.startsWith (prefix))
-				{
-				c.set (key.substring (prefix.length ()), this.get (key));
-				}
-			else if (key.equals (base))
-				{
-				c.set ("", this.get (key));
-				}
-        }
-
-    	return (c);
-    }
-
-	/**
-	 * sets the basename
-	 *
-	 * @params	baseName	-	the new basename
-	*/
-    public void basename (String baseName)
-	{
-        this.baseName = baseName;
-    }
+  /**
+   * sets the basename
+   *
+   * @params baseName  -	the new basename
+   */
+  public void basename(String baseName) {
+    this.baseName = baseName;
+  }
 }

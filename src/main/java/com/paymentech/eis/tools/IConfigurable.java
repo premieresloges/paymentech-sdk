@@ -38,20 +38,19 @@
 package com.paymentech.eis.tools;
 
 /**
- * This interface must be implemented by all those classes that need 
+ * This interface must be implemented by all those classes that need
  * parameters to specify their global behavior during their initialization.
- * 
- * <p>Every class must implement this interface and have empty contructor 
+ * <p/>
+ * <p>Every class must implement this interface and have empty contructor
  * methods instead of relying on Reflection for configuration.
  *
- * @author	Jeff Palmiero
  * @version $Revision:   1.1  $
-*/
-public interface IConfigurable 
-{
-    /**
-     * Initialize the class by passing its configurations.
-    */
-    public void init(Configurations conf) throws InitializationException;
+ * @author Jeff Palmiero
+ */
+public interface IConfigurable {
+  /**
+   * Initialize the class by passing its configurations.
+   */
+  public void init(Configurations conf) throws InitializationException;
 }
 

@@ -4,7 +4,7 @@ import com.paymentech.orbital.sdk.util.exceptions.InitializationException;
 
 /**
  * <p><b>Title:</b> TemplateLoaderIF</p> <p>(C)opyright 2007, Chase Paymentech Solutions, LLC. All rights reserved
- * 
+ * <p/>
  * The copyright notice above does not evidence any actual or intended
  * publication of such source code.
  * The copyright notice above does not evidence any actual or intended publication of such source code.</p>
@@ -13,6 +13,6 @@ import com.paymentech.orbital.sdk.util.exceptions.InitializationException;
  */
 public interface TemplateLoaderIF {
 
-	public String loadTemplate(String value) throws InitializationException;
-	
+  public String loadTemplate(String value) throws InitializationException;
+
 }

@@ -37,32 +37,32 @@
 package com.paymentech.eis.tools;
 
 // Standard Java imports 
-import java.util.*;
+
+import java.util.Vector;
 
 /**
- * The IConfigurablesFactory defines methods for creating and 
+ * The IConfigurablesFactory defines methods for creating and
  * properly initialize dynamically loaded classes that are
- * configurable. 
+ * configurable.
  *
- * @author	Jeff Palmiero
  * @version $Revision:   1.1  $
-*/
-public interface IConfigurablesFactory
-{
-    /**
-     * Create the instance of a class and, if configurable, use 
-     * the given configurations to configure it.
-	 *
-	 * @params		name		-		name of the class
-	 * @params		conf		-	 	configuration info	
-    */
-    public Object create(String name, Configurations conf);
-    
-    /**
-     * Create a vector of instances with given configurations.
-	 *
-	 * @params		names		-		names of the class
-	 * @params		conf		-	 	configuration info	
-    */
-    public Vector create(Vector names, Configurations conf);
+ * @author Jeff Palmiero
+ */
+public interface IConfigurablesFactory {
+  /**
+   * Create the instance of a class and, if configurable, use
+   * the given configurations to configure it.
+   *
+   * @params name    -		name of the class
+   * @params conf    -	 configuration info
+   */
+  public Object create(String name, Configurations conf);
+
+  /**
+   * Create a vector of instances with given configurations.
+   *
+   * @params names    -		names of the class
+   * @params conf    -	 configuration info
+   */
+  public Vector create(Vector names, Configurations conf);
 }

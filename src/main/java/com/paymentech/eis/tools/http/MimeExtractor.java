@@ -108,15 +108,16 @@
 package com.paymentech.eis.tools.http;
 
 // Standard Java imports
-import java.io.Reader;
+
+import com.paymentech.eis.tools.Debug;
+
+import javax.net.ssl.SSLProtocolException;
 import java.io.IOException;
+import java.io.Reader;
 import java.net.SocketException;
 
 // Paymentech imports
-import com.paymentech.eis.tools.Debug;
-
 // SSL imports
-import javax.net.ssl.SSLProtocolException;
 
 /**
  * This utility class takes a reader and will return the entire
@@ -124,125 +125,111 @@ import javax.net.ssl.SSLProtocolException;
  * responsible for positing the reader at the first byte of the
  * payload.
  *
- * @author  Jeff Palmiero
+ * @author Jeff Palmiero
  * @version $Revision:   1.1  $
  */
-public class MimeExtractor implements HeaderExtractor
-{
-	private Reader m_reader = null;
+public class MimeExtractor implements HeaderExtractor {
+  private Reader m_reader = null;
 
-	/**
-	 * Get a handle to the reader so that extract method can use it
-	 * to pluck out the MIME Header
-	 *
-	 * @param reader The reader which extract will work on (typically
-	 *  the underlying stream is a socket.)
-	 */
-	public MimeExtractor (Reader reader)
-	{
-		Debug.PRECONDITION ("reader != null", reader != null);
-		m_reader = reader;
-	}
+  /**
+   * Get a handle to the reader so that extract method can use it
+   * to pluck out the MIME Header
+   *
+   * @param reader The reader which extract will work on (typically
+   *               the underlying stream is a socket.)
+   */
+  public MimeExtractor(Reader reader) {
+    Debug.PRECONDITION("reader != null", reader != null);
+    m_reader = reader;
+  }
 
-	/**
-	 * Hide the default constructor because it leaves the extractor
-	 * in an inconsistent state.
-	 */
-	private MimeExtractor () {}
+  /**
+   * Hide the default constructor because it leaves the extractor
+   * in an inconsistent state.
+   */
+  private MimeExtractor() {
+  }
 
-    /**Extracts the mime information into MimeHeader class
-    *@return Header
-    *@exception IOException
-    */
-	public Header extract () throws IOException
-	{
+  /**
+   * Extracts the mime information into MimeHeader class
+   *
+   * @return Header
+   * @throws IOException
+   */
+  public Header extract() throws IOException {
 
-		MimeHeader retHeader = null;
+    MimeHeader retHeader = null;
 
-		StringBuffer MIMEHeader = new StringBuffer ();
-		StringBuffer requestLine = new StringBuffer ();
+    StringBuffer MIMEHeader = new StringBuffer();
+    StringBuffer requestLine = new StringBuffer();
 
-		int nextChar;
-		boolean blankLineFound = false;
+    int nextChar;
+    boolean blankLineFound = false;
 
-		try
-			{
-			while (!blankLineFound)
-				{
-				// smoke the requestLine
-				requestLine.setLength (0);
+    try {
+      while (!blankLineFound) {
+        // smoke the requestLine
+        requestLine.setLength(0);
 
-				boolean lfFound = false;
+        boolean lfFound = false;
 
-				while ((nextChar = m_reader.read ()) != -1)
-					{
-					// It appears that TT is not sending carriage returns
-					// in their response message so just look for lineFeeds
-					if (nextChar == '\n') lfFound = true;
+        while ((nextChar = m_reader.read()) != -1) {
+          // It appears that TT is not sending carriage returns
+          // in their response message so just look for lineFeeds
+          if (nextChar == '\n') lfFound = true;
 
-					requestLine.append ((char) nextChar);
+          requestLine.append((char) nextChar);
 
-					// If found a LF must be EOL
-					if (lfFound) break;
-					}
+          // If found a LF must be EOL
+          if (lfFound) break;
+        }
 
 
-				if (nextChar == -1)
-					{
-					Debug.trace_debug ("MimeExtractor::extract",
-						" Got to the end of the file without "
-						+ "detecting a blank line");
+        if (nextChar == -1) {
+          Debug.trace_debug("MimeExtractor::extract",
+              " Got to the end of the file without "
+                  + "detecting a blank line");
 
-					// -1 imply's that either the stream is closed or the socket
-					//was closed by the application or by the socket timeout.
+          // -1 imply's that either the stream is closed or the socket
+          //was closed by the application or by the socket timeout.
 
-					throw new SocketException("MimeExtractor reports that socket is closed");
+          throw new SocketException("MimeExtractor reports that socket is closed");
 
-					}
-				else if (requestLine.charAt(0) == '\n')
-					{ // Found the blank line I was looking for
-					blankLineFound = true;
-					}
-				else
-					{
-				        Debug.trace_debug ("MimeExtractor::extract",
-					  "Normal EOL (10) incountered -> " + nextChar + ".  Here is the line: "
-                                          + requestLine.toString());
-					MIMEHeader.append (requestLine.toString());
-					}
-				}
+        } else if (requestLine.charAt(0) == '\n') { // Found the blank line I was looking for
+          blankLineFound = true;
+        } else {
+          Debug.trace_debug("MimeExtractor::extract",
+              "Normal EOL (10) incountered -> " + nextChar + ".  Here is the line: "
+                  + requestLine.toString());
+          MIMEHeader.append(requestLine.toString());
+        }
+      }
 
-			retHeader = new MimeHeader (MIMEHeader.toString ());
-			}
-		catch (SSLProtocolException spe)
-			{
-			Debug.trace_error ("MimeExtractor::extract",
-				spe.getMessage ());
-			throw spe;
-			}
-		catch (SocketException soe)
-			{
-            //This could be a time out so do not report it as an error
+      retHeader = new MimeHeader(MIMEHeader.toString());
+    } catch (SSLProtocolException spe) {
+      Debug.trace_error("MimeExtractor::extract",
+          spe.getMessage());
+      throw spe;
+    } catch (SocketException soe) {
+      //This could be a time out so do not report it as an error
 
-			Debug.trace_debug ("MimeExtractor::extract",
-				soe.getMessage ());
+      Debug.trace_debug("MimeExtractor::extract",
+          soe.getMessage());
 
-			// If the SocketException is due to an interrupt
-			// request(code: 10004) from the factory
-			// do not re-throw the exception, otherwise pass the
-			// exception to the Reader Thread.
+      // If the SocketException is due to an interrupt
+      // request(code: 10004) from the factory
+      // do not re-throw the exception, otherwise pass the
+      // exception to the Reader Thread.
 
-			if(soe.getMessage().indexOf("10004") == -1)
-				throw soe;
+      if (soe.getMessage().indexOf("10004") == -1)
+        throw soe;
 
-			}
-		catch (IOException ioe)
-			{
-			Debug.trace_error ("MimeExtractor::extract",
-				ioe.getMessage ());
-			throw ioe;
-			}
+    } catch (IOException ioe) {
+      Debug.trace_error("MimeExtractor::extract",
+          ioe.getMessage());
+      throw ioe;
+    }
 
-		return retHeader;
-	}
+    return retHeader;
+  }
 };

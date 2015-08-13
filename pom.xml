@@ -6,7 +6,7 @@
 
     <groupId>com.paymentech</groupId>
     <artifactId>paymentech-sdk</artifactId>
-    <version>1.0.0</version>
+    <version>7.0.1</version>
 
 
     <dependencies>
@@ -38,4 +38,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

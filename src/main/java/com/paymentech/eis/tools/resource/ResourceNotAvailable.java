@@ -37,22 +37,20 @@
 package com.paymentech.eis.tools.resource;
 
 /**
- * ResourceNotAvailable - An exception class indicating that a resource 
+ * ResourceNotAvailable - An exception class indicating that a resource
  * cannot be obtained from a ResourceManager for some reason.
  *
- * @author		jpalmiero
- * @version		$Revision:   1.1  $	
-*/
-public class ResourceNotAvailable extends Throwable  
-{
-	/**
-	 * Constructor initializes exception with a human-readable error message.
-	 *
-	 * @params	message		The human-readable error message
-	*/
-	ResourceNotAvailable (String message)
-	{
-		super (message);
-	}
+ * @author jpalmiero
+ * @version $Revision: 1.1  $
+ */
+public class ResourceNotAvailable extends Throwable {
+  /**
+   * Constructor initializes exception with a human-readable error message.
+   *
+   * @params message    The human-readable error message
+   */
+  ResourceNotAvailable(String message) {
+    super(message);
+  }
 };
 

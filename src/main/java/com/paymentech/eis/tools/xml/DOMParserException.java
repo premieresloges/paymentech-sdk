@@ -39,18 +39,16 @@ package com.paymentech.eis.tools.xml;
  * DOMParserException - Indicates that something went wrong trying to parse
  * an xml document.
  *
- * @author		jpalmiero
- * @version		$Revision:   1.1  $
-*/
-public class DOMParserException extends Exception
-{
-	/**
-	 * Constructs the exception with the human-readable error message. 
-	 *
-	 * @params	msg		The human-readable error message.
-	*/
-	DOMParserException (String msg)
-	{
-		super (msg);
-	}
+ * @author jpalmiero
+ * @version $Revision: 1.1  $
+ */
+public class DOMParserException extends Exception {
+  /**
+   * Constructs the exception with the human-readable error message.
+   *
+   * @params msg    The human-readable error message.
+   */
+  DOMParserException(String msg) {
+    super(msg);
+  }
 };

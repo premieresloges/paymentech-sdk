@@ -38,284 +38,259 @@
 package com.paymentech.eis.tools.xml;
 
 // Standard Java imports
-import java.io.OutputStream;
+
+import org.w3c.dom.*;
+
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
 
-// XML imports 
-import org.w3c.dom.Node;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.DOMException;
+// XML imports
 
 /**
  * NodeWriterImpl -  Implementation class for the INodeWriter interface.  This
- * class was adopted directly from Apache's DOMWriter class.  
+ * class was adopted directly from Apache's DOMWriter class.
  *
- * @author		jpalmiero
- * @version		$Revision:   1.1  $
-*/
-public class NodeWriterImpl  extends INodeWriter
-{
-	/**
-	 * Default constructor.  
-	*/
-	NodeWriterImpl ()
-	{
-	}
+ * @author jpalmiero
+ * @version $Revision: 1.1  $
+ */
+public class NodeWriterImpl extends INodeWriter {
+  /**
+   * Default constructor.
+   */
+  NodeWriterImpl() {
+  }
 
-	/**
- 	* printNode		Prints the node to the given OutputStream.
-	*
-	* @params	theNode		The node to print
-	* @params	os			The output stream. 
-	*/
-	public void printNode (Node theNode, OutputStream os)
-		throws IOException, DOMException 
-	{
-		StringBuffer buf = nodeToString (theNode);
-	
-		for (int i = 0; i < buf.length (); i++)
-			{
-			os.write ((char) buf.charAt (i));
-			}
+  /**
+   * printNode		Prints the node to the given OutputStream.
+   *
+   * @params theNode    The node to print
+   * @params os      The output stream.
+   */
+  public void printNode(Node theNode, OutputStream os)
+      throws IOException, DOMException {
+    StringBuffer buf = nodeToString(theNode);
 
-		os.flush ();
-	}
-
-    public void printNode (Node theNode, Writer writer)
-        throws IOException, DOMException
-    {
-        StringBuffer buf = nodeToString (theNode);
-        
-        for (int i = 0; i < buf.length (); i++)
-            {
-            writer.write ((char) buf.charAt (i));
-            }
-
-        writer.flush ();
+    for (int i = 0; i < buf.length(); i++) {
+      os.write((char) buf.charAt(i));
     }
 
-	/**
-	* nodeToString		Returns a string buffer containing the printed node
-	* with UTF8 encoding.
-	*/
-	public StringBuffer nodeToString (Node theNode)
-	{
-		StringBuffer buf = new StringBuffer ();
+    os.flush();
+  }
 
-    	// is there anything to do?
-    	if ( theNode != null ) 
-			appendNodeText (theNode, buf);
+  public void printNode(Node theNode, Writer writer)
+      throws IOException, DOMException {
+    StringBuffer buf = nodeToString(theNode);
 
-		return buf;
-	}
+    for (int i = 0; i < buf.length(); i++) {
+      writer.write((char) buf.charAt(i));
+    }
 
-	/**
-	 * appendNodeText	Appends to the StringBuffer, 'buf', the text 
-	 * associated with 'node'.  This method will recursively call itself
-	 * for nodes having children.  This method was adapted directly from 
-	 * Apaches DOMWriter class.
-	 *
-	 * @params	node		The node to print.
-	 * @params	buf			The buffer to which to append the text.
-	*/
-	private void appendNodeText (Node node, StringBuffer buf)
-	{
-		int type = node.getNodeType();
-		switch ( type ) 
-			{
-         
-			// print document
-			case Node.DOCUMENT_NODE: 
-				{
-				String  Encoding = "UTF-8"; 
+    writer.flush();
+  }
 
-				buf.append("<?xml version=\"1.0\" encoding=\""+ Encoding + 
-					"\"?>");
+  /**
+   * nodeToString		Returns a string buffer containing the printed node
+   * with UTF8 encoding.
+   */
+  public StringBuffer nodeToString(Node theNode) {
+    StringBuffer buf = new StringBuffer();
 
-				appendNodeText (((Document)node).getDocumentElement(), buf);
-				break;
-				}
+    // is there anything to do?
+    if (theNode != null)
+      appendNodeText(theNode, buf);
 
-            // print element with attributes
-			case Node.ELEMENT_NODE: 
-				{
-				buf.append ('<');
-				buf.append (node.getNodeName());
-				Attr attrs[] = sortAttributes(node.getAttributes());
+    return buf;
+  }
 
-				for ( int i = 0; i < attrs.length; i++ ) 
-					{
-					Attr attr = attrs[i];
-					buf.append (' ');
-					buf.append (attr.getNodeName());
-					buf.append ("=\"");
-					buf.append (normalize(attr.getNodeValue(), false));
-					buf.append ('"');
-					}
+  /**
+   * appendNodeText	Appends to the StringBuffer, 'buf', the text
+   * associated with 'node'.  This method will recursively call itself
+   * for nodes having children.  This method was adapted directly from
+   * Apaches DOMWriter class.
+   *
+   * @params node    The node to print.
+   * @params buf      The buffer to which to append the text.
+   */
+  private void appendNodeText(Node node, StringBuffer buf) {
+    int type = node.getNodeType();
+    switch (type) {
 
-				buf.append(">");
+      // print document
+      case Node.DOCUMENT_NODE: {
+        String Encoding = "UTF-8";
 
-				NodeList children = node.getChildNodes();
-				if ( children != null ) 
-					{
-					int len = children.getLength();
-					for ( int i = 0; i < len; i++ ) 
-						appendNodeText(children.item(i), buf);
-					}
-				break;
-				}
+        buf.append("<?xml version=\"1.0\" encoding=\"" + Encoding +
+            "\"?>");
 
-			// handle entity reference nodes
-			case Node.ENTITY_REFERENCE_NODE: 
-				{
-				NodeList children = node.getChildNodes();
-				if ( children != null ) 
-					{
-					int len = children.getLength();
-					for ( int i = 0; i < len; i++ ) 
-						{
-						appendNodeText (children.item(i), buf);
-						}
-					}
-				break;
-				}
-
-			// print cdata sections
-			case Node.CDATA_SECTION_NODE: 
-				{
-				buf.append (normalize(node.getNodeValue(), false));
-				break;
-				}
-
-			// print text
-			case Node.TEXT_NODE: 
-				{
-				buf.append (normalize(node.getNodeValue(), false));
-				break;
-				}
-
-			// print processing instruction
-			case Node.PROCESSING_INSTRUCTION_NODE: 
-				{
-				buf.append ("<?");
-				buf.append (node.getNodeName());
-
-				String data = node.getNodeValue();
-				if ( data != null && data.length() > 0 ) 
-					{
-					buf.append (' ');
-					buf.append (data);
-					}
-				buf.append ("?>");
-				break;
-				}
-
-			} // end switch
-
-			if ( type == Node.ELEMENT_NODE ) 
-				{
-				buf.append("</");
-				buf.append(node.getNodeName());
-				buf.append(">");
-				}
-
-	} // end appendNodeText()
-
-	/**
-	 * sortAttributes  Returns a sorted list of Attr's from the given 
-	 * NamedNodeMap instance. This function was taken directly from 
-	 * Apache's DOMWriter class.
-	*/
-	protected Attr[] sortAttributes(NamedNodeMap attrs) 
-	{
-
-      int len = (attrs != null) ? attrs.getLength() : 0;
-      Attr array[] = new Attr[len];
-      for ( int i = 0; i < len; i++ ) {
-         array[i] = (Attr)attrs.item(i);
-      }
-      for ( int i = 0; i < len - 1; i++ ) {
-         String name  = array[i].getNodeName();
-         int    index = i;
-         for ( int j = i + 1; j < len; j++ ) {
-            String curName = array[j].getNodeName();
-            if ( curName.compareTo(name) < 0 ) {
-               name  = curName;
-               index = j;
-            }
-         }
-         if ( index != i ) {
-            Attr temp    = array[i];
-            array[i]     = array[index];
-            array[index] = temp;
-         }
+        appendNodeText(((Document) node).getDocumentElement(), buf);
+        break;
       }
 
-      return (array);
+      // print element with attributes
+      case Node.ELEMENT_NODE: {
+        buf.append('<');
+        buf.append(node.getNodeName());
+        Attr attrs[] = sortAttributes(node.getAttributes());
 
-	} // sortAttributes(NamedNodeMap):Attr[]
+        for (int i = 0; i < attrs.length; i++) {
+          Attr attr = attrs[i];
+          buf.append(' ');
+          buf.append(attr.getNodeName());
+          buf.append("=\"");
+          buf.append(normalize(attr.getNodeValue(), false));
+          buf.append('"');
+        }
 
-	/**
-	 * Normalizes a DOM text string by replacing special characters
-	 * with their normalized UTF-8 encoding equivalent.  This method 
-	 * was taken straight from Apache's DOMWriter example class.
-	 * 
-	 * @params	s		The text to normalize
-	 * @returns	The normalized text 
-	*/
-	protected String normalize(String s, boolean canonical) 
-	{
-		StringBuffer str = new StringBuffer();
+        buf.append(">");
 
-		int len = (s != null) ? s.length() : 0;
+        NodeList children = node.getChildNodes();
+        if (children != null) {
+          int len = children.getLength();
+          for (int i = 0; i < len; i++)
+            appendNodeText(children.item(i), buf);
+        }
+        break;
+      }
 
-		for ( int i = 0; i < len; i++ ) 
-			{
-			char ch = s.charAt(i);
+      // handle entity reference nodes
+      case Node.ENTITY_REFERENCE_NODE: {
+        NodeList children = node.getChildNodes();
+        if (children != null) {
+          int len = children.getLength();
+          for (int i = 0; i < len; i++) {
+            appendNodeText(children.item(i), buf);
+          }
+        }
+        break;
+      }
 
-			switch ( ch ) 
-				{
-				case '<': {
-					str.append("&lt;"); break;
-					}
+      // print cdata sections
+      case Node.CDATA_SECTION_NODE: {
+        buf.append(normalize(node.getNodeValue(), false));
+        break;
+      }
 
-				case '>': {
-					str.append("&gt;"); break;
-					}
+      // print text
+      case Node.TEXT_NODE: {
+        buf.append(normalize(node.getNodeValue(), false));
+        break;
+      }
 
-				case '&': {
-					str.append("&amp;"); break;
-					}
+      // print processing instruction
+      case Node.PROCESSING_INSTRUCTION_NODE: {
+        buf.append("<?");
+        buf.append(node.getNodeName());
 
-				case '"': {
-					str.append("&quot;"); break;
-					}
+        String data = node.getNodeValue();
+        if (data != null && data.length() > 0) {
+          buf.append(' ');
+          buf.append(data);
+        }
+        buf.append("?>");
+        break;
+      }
 
-				case '\r':
-				case '\n': { 
-					if ( canonical ) 
-						{
-						str.append("&#");
-						str.append(Integer.toString(ch));
-						str.append(';');
-						break;
-						}
-					// else, default append char
-					}
-				default: {
-					str.append(ch);
-					}
-				}
-			}
+    } // end switch
 
-		return (str.toString());
+    if (type == Node.ELEMENT_NODE) {
+      buf.append("</");
+      buf.append(node.getNodeName());
+      buf.append(">");
+    }
 
-	} // normalize(String):String
+  } // end appendNodeText()
 
-	
+  /**
+   * sortAttributes  Returns a sorted list of Attr's from the given
+   * NamedNodeMap instance. This function was taken directly from
+   * Apache's DOMWriter class.
+   */
+  protected Attr[] sortAttributes(NamedNodeMap attrs) {
+
+    int len = (attrs != null) ? attrs.getLength() : 0;
+    Attr array[] = new Attr[len];
+    for (int i = 0; i < len; i++) {
+      array[i] = (Attr) attrs.item(i);
+    }
+    for (int i = 0; i < len - 1; i++) {
+      String name = array[i].getNodeName();
+      int index = i;
+      for (int j = i + 1; j < len; j++) {
+        String curName = array[j].getNodeName();
+        if (curName.compareTo(name) < 0) {
+          name = curName;
+          index = j;
+        }
+      }
+      if (index != i) {
+        Attr temp = array[i];
+        array[i] = array[index];
+        array[index] = temp;
+      }
+    }
+
+    return (array);
+
+  } // sortAttributes(NamedNodeMap):Attr[]
+
+  /**
+   * Normalizes a DOM text string by replacing special characters
+   * with their normalized UTF-8 encoding equivalent.  This method
+   * was taken straight from Apache's DOMWriter example class.
+   *
+   * @params s    The text to normalize
+   * @returns The normalized text
+   */
+  protected String normalize(String s, boolean canonical) {
+    StringBuffer str = new StringBuffer();
+
+    int len = (s != null) ? s.length() : 0;
+
+    for (int i = 0; i < len; i++) {
+      char ch = s.charAt(i);
+
+      switch (ch) {
+        case '<': {
+          str.append("&lt;");
+          break;
+        }
+
+        case '>': {
+          str.append("&gt;");
+          break;
+        }
+
+        case '&': {
+          str.append("&amp;");
+          break;
+        }
+
+        case '"': {
+          str.append("&quot;");
+          break;
+        }
+
+        case '\r':
+        case '\n': {
+          if (canonical) {
+            str.append("&#");
+            str.append(Integer.toString(ch));
+            str.append(';');
+            break;
+          }
+          // else, default append char
+        }
+        default: {
+          str.append(ch);
+        }
+      }
+    }
+
+    return (str.toString());
+
+  } // normalize(String):String
+
+
 };
 

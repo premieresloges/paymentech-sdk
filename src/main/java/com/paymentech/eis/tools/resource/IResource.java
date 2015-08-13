@@ -39,21 +39,20 @@ package com.paymentech.eis.tools.resource;
  * IResource - The IResource is an interface representing an entity which can
  * be managed by a ResourceManager which can throttle access to it.
  *
- * @author		jpalmiero
- * @version		$Revision:   1.1  $
-*/
-public interface IResource 
-{
-	/**
-	 * resourceAcquired			This method is invoked when the resource
-	 * is acquired.
-	*/
-	public void resourceAcquired();
+ * @author jpalmiero
+ * @version $Revision: 1.1  $
+ */
+public interface IResource {
+  /**
+   * resourceAcquired			This method is invoked when the resource
+   * is acquired.
+   */
+  public void resourceAcquired();
 
-	/**
-	 * resourceReleased			This method is invoked when the resource
-	 * is released.
-	*/
-	public void resourceReleased();
+  /**
+   * resourceReleased			This method is invoked when the resource
+   * is released.
+   */
+  public void resourceReleased();
 };
 

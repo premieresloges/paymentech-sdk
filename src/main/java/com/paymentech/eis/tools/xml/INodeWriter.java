@@ -37,58 +37,57 @@
 package com.paymentech.eis.tools.xml;
 
 // Standard Java imports
-import java.io.OutputStream;
+
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Node;
+
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
 
 // XML imports
-import org.w3c.dom.Node;
-import org.w3c.dom.DOMException;
 
 /**
  * INodeWriter -  Abstract class for printing org.w3c.dom.Node elements with
- * the UTF-8 encoding scheme (plain-old ascii).  Support for other encoding 
+ * the UTF-8 encoding scheme (plain-old ascii).  Support for other encoding
  * schemes could be added here.
  *
- * @author		jpalmiero
- * @version		$Revision:   1.1  $
-*/
-public abstract class INodeWriter
-{
-	/**
-	 * printNode 	Prints 'theNode' to the output stream 'os' with the
-	 * UTF-8 encoding.
-	 *
-	 * @params	theNode		The node to print
-	 * @params	os			The output stream 
-	 *
-	*/
-	public abstract void printNode (Node theNode, OutputStream os)
-		throws DOMException, IOException;
+ * @author jpalmiero
+ * @version $Revision: 1.1  $
+ */
+public abstract class INodeWriter {
+  // Instance variables
+  private static INodeWriter m_nodeWriter = new NodeWriterImpl();
 
-	public abstract void printNode (Node theNode, Writer writer)
-		throws DOMException, IOException;
+  /**
+   * instance		Returns an INodeWriter instance.  Actually, a
+   * NodeWriterImpl instance is returned, but this is immaterial to the
+   * client. This enforces the singleton pattern.
+   */
+  public static INodeWriter instance() {
+    return m_nodeWriter;
+  }
 
-	/**
-	*  nodeToString			Returns a string buffer containing 
-	*  the printed node with encoding UTF-8.	
-	*
-	*  @params	theNode		The node to print
-	*/
-	public abstract StringBuffer nodeToString (Node theNode)
-		throws DOMException; 	
+  /**
+   * printNode 	Prints 'theNode' to the output stream 'os' with the
+   * UTF-8 encoding.
+   *
+   * @params theNode    The node to print
+   * @params os      The output stream
+   */
+  public abstract void printNode(Node theNode, OutputStream os)
+      throws DOMException, IOException;
 
-	/**
-	* instance		Returns an INodeWriter instance.  Actually, a 
-	* NodeWriterImpl instance is returned, but this is immaterial to the
-	* client. This enforces the singleton pattern.
-	*/
-	public static INodeWriter instance ()
-	{
-		return m_nodeWriter;	
-	}
+  public abstract void printNode(Node theNode, Writer writer)
+      throws DOMException, IOException;
 
-	// Instance variables 
-	private static INodeWriter m_nodeWriter = new NodeWriterImpl ();  
+  /**
+   * nodeToString			Returns a string buffer containing
+   * the printed node with encoding UTF-8.
+   *
+   * @params theNode    The node to print
+   */
+  public abstract StringBuffer nodeToString(Node theNode)
+      throws DOMException;
 };
 

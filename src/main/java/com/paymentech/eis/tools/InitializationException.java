@@ -38,30 +38,28 @@ package com.paymentech.eis.tools;
 
 /**
  * This exception is thrown when a Configurable object is initialized
- * with illegal parameters and cannot complete its initialization. 
- *
+ * with illegal parameters and cannot complete its initialization.
+ * <p/>
  * <p>When such exception is thrown, the object is not guaranteed
  * to be usable and the factory should behave accordingly.
  *
- * @author  Jeff Palmiero
+ * @author Jeff Palmiero
  * @version $Revision:   1.1  $
-*/
-public class InitializationException extends InstantiationException 
-{
-	/**
-	 * Default constructions
-	 */
-    public InitializationException () 
-	{
-        super ();
-    }
+ */
+public class InitializationException extends InstantiationException {
+  /**
+   * Default constructions
+   */
+  public InitializationException() {
+    super();
+  }
 
-	/**
-	 * Construction with a message
-	 * @params			some message	
-	 */
-    public InitializationException (String message) 
-	{
-        super (message);
-    }    
+  /**
+   * Construction with a message
+   *
+   * @params some message
+   */
+  public InitializationException(String message) {
+    super(message);
+  }
 }

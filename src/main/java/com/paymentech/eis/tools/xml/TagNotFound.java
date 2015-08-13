@@ -2,18 +2,23 @@
 
 package com.paymentech.eis.tools.xml;
 
-/** This exception is thrown when condition occurred */
+/**
+ * This exception is thrown when condition occurred
+ */
 public class TagNotFound extends Exception {
-    /** Constructs an Exception without a message. */
-    public TagNotFound() {
-        super();
-    }
+  /**
+   * Constructs an Exception without a message.
+   */
+  public TagNotFound() {
+    super();
+  }
 
-    /**
-     * Constructs an Exception with a detailed message.
-     * @param Message The message associated with the exception.
-     */
-    public TagNotFound(String message) {
-        super(message);
-    }
+  /**
+   * Constructs an Exception with a detailed message.
+   *
+   * @param Message The message associated with the exception.
+   */
+  public TagNotFound(String message) {
+    super(message);
+  }
 }

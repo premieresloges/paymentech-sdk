@@ -65,8 +65,10 @@
 package com.paymentech.eis.tools;
 
 // Standard Java imports
-import java.io.*;					// for ByteArrayOutputStream
-import java.lang.Thread;			// for Thread functions
+
+import java.io.ByteArrayOutputStream;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -76,119 +78,106 @@ import java.util.Date;
 
 /**
  * Debug.java - Utilities class for doing PRE,POST, ASSERT.
- *
-*/
-public class Debug
-{
-	////////////////////////////////////////////////////////////////
-	// Private Members
-	////////////////////////////////////////////////////////////////
+ */
+public class Debug {
+  ////////////////////////////////////////////////////////////////
+  // Private Members
+  ////////////////////////////////////////////////////////////////
 
-	private static boolean m_bDebug = false;
-	private static boolean m_bVerbose = false;
-        private static String  m_errFile = null;
+  private static boolean m_bDebug = false;
+  private static boolean m_bVerbose = false;
+  private static String m_errFile = null;
 
-    /**
-     * Private Constructor. Don't let anyone instantiate this class.
-    */
-    protected Debug ()
-	{
-	;
+  /**
+   * Private Constructor. Don't let anyone instantiate this class.
+   */
+  protected Debug() {
+    ;
+  }
+
+  /**
+   * PRECONDITION - Asserts a precondition. This is the same thing
+   * as ASSERT but is defined to provide richer semantic meaning.
+   */
+  public static void PRECONDITION(String msg, boolean condition) {
+    ASSERT(msg, condition);
+  }
+
+  /**
+   * POSTCONDITION - Asserts a postcondition. This is the same thing
+   * as ASSERT but is defined to provide richer semantic meaning.
+   */
+  public static void POSTCONDITION(String msg, boolean condition) {
+    ASSERT(msg, condition);
+  }
+
+  /**
+   * ASSERT - Asserts some condition. This will only be available
+   * in the debug mode.
+   */
+  public static void ASSERT(String msg, boolean condition) {
+    if (m_bDebug == true && !condition) {
+      System.out.println("ASSERT FAILED: [" + msg + "]");
+      Thread.dumpStack();
+
+      // Temporary to stop JVM in its tracks
+      // System.exit (0);
     }
+  }
 
-	/**
-	 * PRECONDITION - Asserts a precondition. This is the same thing
-	 * as ASSERT but is defined to provide richer semantic meaning.
-	*/
-	public static void PRECONDITION (String msg, boolean condition)
-	{
-		ASSERT (msg, condition);
-	}
+  /**
+   * trace_debug - Prints to the log file if we are in the
+   * debug mode.
+   *
+   * @params msg1    - some message
+   * @params msg2    - some other message
+   */
+  public static void trace_debug(String msg1, String msg2) {
+    if (m_bDebug == true) {
+      System.out.println(Thread.currentThread().getName()
+          + ":[" + msg1 + "] [" + msg2 + "]");
+    }
+  }
 
-	/**
-	 * POSTCONDITION - Asserts a postcondition. This is the same thing
-	 * as ASSERT but is defined to provide richer semantic meaning.
-	*/
-	public static void POSTCONDITION (String msg, boolean condition)
-	{
-		ASSERT (msg, condition);
-	}
+  /**
+   * trace_verbose - Prints to the log file if we are in the
+   * verbose mode.
+   *
+   * @params msg1    - some message
+   * @params msg2    - some other message
+   */
+  public static void trace_verbose(String msg1, String msg2) {
+    if (m_bVerbose == true) {
+      System.out.println(Thread.currentThread().getName()
+          + ":[" + msg1 + "] [" + msg2 + "]");
+    }
+  }
 
-	/**
-	 * ASSERT - Asserts some condition. This will only be available
-	 * in the debug mode.
-	*/
-	public static void ASSERT (String msg, boolean condition)
-	{
-		if (m_bDebug == true && !condition)
-			{
-			System.out.println ("ASSERT FAILED: [" + msg + "]");
-			Thread.dumpStack ();
+  /**
+   * trace_error - Prints to the log file at all times.
+   *
+   * @params msg1    - some message
+   * @params msg2    - some other message
+   */
+  public static void trace_error(String msg1, String msg2) {
+    String errMsg = Thread.currentThread().getName()
+        + ":[" + msg1 + "] [" + msg2 + "]";
 
-			// Temporary to stop JVM in its tracks
-			// System.exit (0);
-			}
-	}
+    System.out.println(errMsg);
 
-	/**
-	 * trace_debug - Prints to the log file if we are in the
-	 * debug mode.
-	 *
-	 * @params	msg1		- 		some message
-	 * @params	msg2		- 		some other message
-	*/
-	public static void trace_debug (String msg1, String msg2)
-	{
-		if (m_bDebug == true)
-                {
-		    System.out.println(Thread.currentThread ().getName ()
-			+ ":[" + msg1 + "] [" + msg2 + "]");
-                }
-	}
+    if (m_errFile != null) {
+      logErrorMessage(errMsg);
+    }
+  }
 
-	/**
-	 * trace_verbose - Prints to the log file if we are in the
-	 * verbose mode.
-	 *
-	 * @params	msg1		- 		some message
-	 * @params	msg2		- 		some other message
-	*/
-	public static void trace_verbose (String msg1, String msg2)
-	{
-		if (m_bVerbose == true)
-                {
-		    System.out.println(Thread.currentThread ().getName ()
-			+ ":[" + msg1 + "] [" + msg2 + "]");
-                }
-	}
+  /**
+   * trace_debug - Prints debug messages to the servlet's log
+   *
+   * @params servlet      -       A logging servlet
+   */
 
-	/**
-	 * trace_error - Prints to the log file at all times.
-	 *
-	 * @params	msg1		- 		some message
-	 * @params	msg2		- 		some other message
-	*/
-	public static void trace_error (String msg1, String msg2)
-	{
-                String errMsg = Thread.currentThread ().getName ()
-			+ ":[" + msg1 + "] [" + msg2 + "]";
-
-		System.out.println (errMsg);
-
-                 if  (m_errFile != null)
-                {
-                    logErrorMessage(errMsg);
-                }
-	}
-
-    /**
-     * trace_debug - Prints debug messages to the servlet's log
-     *
-     * @params servlet      -       A logging servlet
-     */
-
-    // Comment out the support for servlet logging for the moment so JBuilder
-    // can compile without having to bring in the Servlet SDK jar
+  // Comment out the support for servlet logging for the moment so JBuilder
+  // can compile without having to bring in the Servlet SDK jar
     /*
 
     public static void trace_debug (GenericServlet servlet, String msg1,
@@ -199,14 +188,14 @@ public class Debug
     }
     */
 
-    /**
-     * trace_error - Prints to the servlet log
-     *
-     * @params servlet      -       A logging servlet
-     */
+  /**
+   * trace_error - Prints to the servlet log
+   *
+   * @params servlet      -       A logging servlet
+   */
 
-    // Comment out the support for servlet logging for the moment so JBuilder
-    // can compile without having to bring in the Servlet SDK jar
+  // Comment out the support for servlet logging for the moment so JBuilder
+  // can compile without having to bring in the Servlet SDK jar
     /*
     public static void trace_error (GenericServlet servlet, String msg1,
         String msg2)
@@ -215,85 +204,76 @@ public class Debug
     }
     */
 
-	/**
-	 * mode - Sets the debugging mode.
-	 *
-	 * @params	value		- 		true for debugging <b>ON</b>
-	*/
-	public static void mode (boolean mode)
-	{
-		m_bDebug = mode;
-	}
+  /**
+   * mode - Sets the debugging mode.
+   *
+   * @params value    - true for debugging <b>ON</b>
+   */
+  public static void mode(boolean mode) {
+    m_bDebug = mode;
+  }
 
-	/**
-	 * verbose - Sets the verbosity mode.
-	 *
-	 * @params	value		- 		true for vebose output
-	*/
-	public static void verbose (boolean mode)
-	{
-		m_bVerbose = mode;
-                //Thread.dumpStack();
-        }
+  /**
+   * verbose - Sets the verbosity mode.
+   *
+   * @params value    - true for vebose output
+   */
+  public static void verbose(boolean mode) {
+    m_bVerbose = mode;
+    //Thread.dumpStack();
+  }
 
-	/**
-	 * stackTraceAsString - Returns a stack trace as a String.
-	 *
-	 * @params	exception		- 	 	some exception
-	 * @returns	string			-		exception with stack trace
-	*/
-	public static String stackTraceAsString (Exception ex)
-	{
-		ByteArrayOutputStream bytes = new ByteArrayOutputStream ();
-		PrintWriter writer = new PrintWriter (bytes, true);
+  /**
+   * stackTraceAsString - Returns a stack trace as a String.
+   *
+   * @params exception    - some exception
+   * @returns string      -		exception with stack trace
+   */
+  public static String stackTraceAsString(Exception ex) {
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintWriter writer = new PrintWriter(bytes, true);
 
-		ex.printStackTrace (writer);
+    ex.printStackTrace(writer);
 
-		return (bytes.toString ());
-	}
+    return (bytes.toString());
+  }
 
-        /**
-	 * getVerboseMode
-	 *
- 	 */
-	public static boolean getVerboseMode()
-	{
-		return m_bVerbose;
-	}
+  /**
+   * getVerboseMode
+   */
+  public static boolean getVerboseMode() {
+    return m_bVerbose;
+  }
 
-        /**
-         *  Set the error file
-         */
-         public static void setErrorFile(String errFile)
-         {
-            m_errFile  = errFile;
-         }
+  /**
+   * Set the error file
+   */
+  public static void setErrorFile(String errFile) {
+    m_errFile = errFile;
+  }
 
-         /**
-          * Log a message
-          */
-        public static void logErrorMessage(String aErrorMsg)
-         {
-            try {
-              FileWriter fw = new FileWriter(m_errFile,true);
+  /**
+   * Log a message
+   */
+  public static void logErrorMessage(String aErrorMsg) {
+    try {
+      FileWriter fw = new FileWriter(m_errFile, true);
 
-              Date newDate = new Date();
-              DateFormat formatDate =
-                  DateFormat.getDateInstance(DateFormat.LONG);
-              DateFormat formatTime =
-                  DateFormat.getTimeInstance(DateFormat.LONG);
+      Date newDate = new Date();
+      DateFormat formatDate =
+          DateFormat.getDateInstance(DateFormat.LONG);
+      DateFormat formatTime =
+          DateFormat.getTimeInstance(DateFormat.LONG);
 
-              fw.write("\n" + aErrorMsg + " Date: " + formatDate.format(newDate) +
-                  " Time: " + formatTime.format(newDate) + "\n");
+      fw.write("\n" + aErrorMsg + " Date: " + formatDate.format(newDate) +
+          " Time: " + formatTime.format(newDate) + "\n");
 
-              fw.flush();
-              fw.close();
-              //Thread.dumpStack();
-              }
-            catch (Exception exp)
-            {
-               Debug.trace_verbose("logMessage","Error: " + exp.toString());
-            }
-          }
+      fw.flush();
+      fw.close();
+      //Thread.dumpStack();
+    } catch (Exception exp) {
+      Debug.trace_verbose("logMessage", "Error: " + exp.toString());
+    }
+  }
 
 }

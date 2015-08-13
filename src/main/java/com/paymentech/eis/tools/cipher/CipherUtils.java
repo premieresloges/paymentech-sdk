@@ -37,164 +37,152 @@
 package com.paymentech.eis.tools.cipher;
 
 // Standard Java imports
+
+import com.paymentech.eis.tools.Debug;
+
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLSocket;
 
 // XML imports
-
 // Servlet imports
-
 // Paymentech imports
-import com.paymentech.eis.tools.Debug;
 
 /**
  * Set of static utilities for manipulating the ciphers (eg algorithms)
  * supported by SSLSockets and SSLServerSockets
  */
-public class CipherUtils
-{
-	/**
-	 * Dump the ciphers that the secure socket supports
-	 *
-	 * @param socket The SSL Socket in question
-	 */
-	public static void dumpCipherSuites (SSLSocket socket)
-	{
-		String[] supported = socket.getEnabledCipherSuites ();
-		dumpSupported (supported);
-	}
+public class CipherUtils {
+  /**
+   * Dump the ciphers that the secure socket supports
+   *
+   * @param socket The SSL Socket in question
+   */
+  public static void dumpCipherSuites(SSLSocket socket) {
+    String[] supported = socket.getEnabledCipherSuites();
+    dumpSupported(supported);
+  }
 
-	
-	/**
-	 * Dump the ciphers that the secure server socket supports
-	 *
-	 * @param socket The SSL Socket in question
-	 */
-	public static void dumpCipherSuites (SSLServerSocket server)
-	{
-		String[] supported = server.getEnabledCipherSuites ();
-		dumpSupported (supported);
-	}
 
-	/**
-	 * Helper method for dumping the supported ciphers
-	 *
-	 * @param supported String array containing all of the supported ciphers
-	 */
-	private static void dumpSupported (String[] supported)
-	{
-		for (int i = 0; i < supported.length; i++)
-			{
-			Debug.trace_verbose ("SecureUpstreamServer::dumpSupported",
-				supported[i]);
-			}
-	}
+  /**
+   * Dump the ciphers that the secure server socket supports
+   *
+   * @param socket The SSL Socket in question
+   */
+  public static void dumpCipherSuites(SSLServerSocket server) {
+    String[] supported = server.getEnabledCipherSuites();
+    dumpSupported(supported);
+  }
 
-	/**
-	 * helper to get a string array of anonymous ciphers from the list
-	 * of supported.
-	 *
-	 * @param supported A String array of supported ciphers
-	 * @returns String[] A String array of anonymous ciphers
-	 */
-	private static String[] getAnonCipher (String[] supported)
-	{
-		String[] anonCipherSuitesSupported = new String [supported.length];
+  /**
+   * Helper method for dumping the supported ciphers
+   *
+   * @param supported String array containing all of the supported ciphers
+   */
+  private static void dumpSupported(String[] supported) {
+    for (int i = 0; i < supported.length; i++) {
+      Debug.trace_verbose("SecureUpstreamServer::dumpSupported",
+          supported[i]);
+    }
+  }
 
-		int numAnonCipherSuitesSupported = 0;
+  /**
+   * helper to get a string array of anonymous ciphers from the list
+   * of supported.
+   *
+   * @param supported A String array of supported ciphers
+   * @returns String[] A String array of anonymous ciphers
+   */
+  private static String[] getAnonCipher(String[] supported) {
+    String[] anonCipherSuitesSupported = new String[supported.length];
 
-		for (int i = 0; i < supported.length; i++)
-			{
-			if (supported[i].indexOf ("_anon_") > 0)
-				{
-				anonCipherSuitesSupported[numAnonCipherSuitesSupported++] =
-					supported[i];
-				}
-			}
+    int numAnonCipherSuitesSupported = 0;
 
-		// Create an array that has exactly numAnonSupported elements in it
-		String[] anonSupported = new String [numAnonCipherSuitesSupported];
-		System.arraycopy (anonCipherSuitesSupported, 0, anonSupported,
-			0, numAnonCipherSuitesSupported);
+    for (int i = 0; i < supported.length; i++) {
+      if (supported[i].indexOf("_anon_") > 0) {
+        anonCipherSuitesSupported[numAnonCipherSuitesSupported++] =
+            supported[i];
+      }
+    }
 
-		return anonSupported;
-	}
+    // Create an array that has exactly numAnonSupported elements in it
+    String[] anonSupported = new String[numAnonCipherSuitesSupported];
+    System.arraycopy(anonCipherSuitesSupported, 0, anonSupported,
+        0, numAnonCipherSuitesSupported);
 
-	/**
-	 * Enable anonymous ciphers as well as those which were previously enabled
-	 * 
-	 * @param socket The secure socket to enable the ciphers on
-	 */
-	public static void enableAnon (SSLSocket socket)
-	{
-		String[] supported = socket.getSupportedCipherSuites ();
-		String[] anonCipherSuitesSupported = getAnonCipher (supported);
+    return anonSupported;
+  }
 
-		String[] oldEnabled = socket.getEnabledCipherSuites ();
-		String[] newEnabled = new String[oldEnabled.length + 
-			anonCipherSuitesSupported.length];
+  /**
+   * Enable anonymous ciphers as well as those which were previously enabled
+   *
+   * @param socket The secure socket to enable the ciphers on
+   */
+  public static void enableAnon(SSLSocket socket) {
+    String[] supported = socket.getSupportedCipherSuites();
+    String[] anonCipherSuitesSupported = getAnonCipher(supported);
 
-		System.arraycopy (oldEnabled, 0, newEnabled, 0, oldEnabled.length);
-		System.arraycopy (anonCipherSuitesSupported, 0, newEnabled,
-			oldEnabled.length, anonCipherSuitesSupported.length);
+    String[] oldEnabled = socket.getEnabledCipherSuites();
+    String[] newEnabled = new String[oldEnabled.length +
+        anonCipherSuitesSupported.length];
 
-		socket.setEnabledCipherSuites (newEnabled);
-	}
+    System.arraycopy(oldEnabled, 0, newEnabled, 0, oldEnabled.length);
+    System.arraycopy(anonCipherSuitesSupported, 0, newEnabled,
+        oldEnabled.length, anonCipherSuitesSupported.length);
 
-	/**
-	 * Enable anonymous ciphers as well as those which were previously enabled
-	 * 
-	 * @param server The secure server socket to enable the ciphers on
-	 */
-	public static void enableAnon (SSLServerSocket server)
-	{
-		String[] supported = server.getSupportedCipherSuites ();
-		String[] anonCipherSuitesSupported = getAnonCipher (supported);
+    socket.setEnabledCipherSuites(newEnabled);
+  }
 
-		String[] oldEnabled = server.getEnabledCipherSuites ();
-		String[] newEnabled = new String[oldEnabled.length + 
-			anonCipherSuitesSupported.length];
+  /**
+   * Enable anonymous ciphers as well as those which were previously enabled
+   *
+   * @param server The secure server socket to enable the ciphers on
+   */
+  public static void enableAnon(SSLServerSocket server) {
+    String[] supported = server.getSupportedCipherSuites();
+    String[] anonCipherSuitesSupported = getAnonCipher(supported);
 
-		System.arraycopy (oldEnabled, 0, newEnabled, 0, oldEnabled.length);
-		System.arraycopy (anonCipherSuitesSupported, 0, newEnabled,
-			oldEnabled.length, anonCipherSuitesSupported.length);
+    String[] oldEnabled = server.getEnabledCipherSuites();
+    String[] newEnabled = new String[oldEnabled.length +
+        anonCipherSuitesSupported.length];
 
-		server.setEnabledCipherSuites (newEnabled);
-	}
+    System.arraycopy(oldEnabled, 0, newEnabled, 0, oldEnabled.length);
+    System.arraycopy(anonCipherSuitesSupported, 0, newEnabled,
+        oldEnabled.length, anonCipherSuitesSupported.length);
 
-	/**
-	 * Enable only anonymous ciphers 
-	 * 
-	 * @param server The secure server socket to enable the ciphers on
-	 */
-	public static void enableOnlyAnon (SSLServerSocket server)
-	{
-		String[] supported = server.getSupportedCipherSuites ();
-		String[] anonCipherSuitesSupported = getAnonCipher (supported);
+    server.setEnabledCipherSuites(newEnabled);
+  }
 
-		String[] newEnabled = new String[anonCipherSuitesSupported.length];
+  /**
+   * Enable only anonymous ciphers
+   *
+   * @param server The secure server socket to enable the ciphers on
+   */
+  public static void enableOnlyAnon(SSLServerSocket server) {
+    String[] supported = server.getSupportedCipherSuites();
+    String[] anonCipherSuitesSupported = getAnonCipher(supported);
 
-		System.arraycopy (anonCipherSuitesSupported, 0, newEnabled,
-			0, anonCipherSuitesSupported.length);
+    String[] newEnabled = new String[anonCipherSuitesSupported.length];
 
-		server.setEnabledCipherSuites (newEnabled);
-	}
+    System.arraycopy(anonCipherSuitesSupported, 0, newEnabled,
+        0, anonCipherSuitesSupported.length);
 
-	/**
-	 * Enable only anonymous ciphers 
-	 * 
-	 * @param socket The secure socket to enable the ciphers on
-	 */
-	public static void enableOnlyAnon (SSLSocket socket)
-	{
-		String[] supported = socket.getSupportedCipherSuites ();
-		String[] anonCipherSuitesSupported = getAnonCipher (supported);
+    server.setEnabledCipherSuites(newEnabled);
+  }
 
-		String[] newEnabled = new String[anonCipherSuitesSupported.length];
+  /**
+   * Enable only anonymous ciphers
+   *
+   * @param socket The secure socket to enable the ciphers on
+   */
+  public static void enableOnlyAnon(SSLSocket socket) {
+    String[] supported = socket.getSupportedCipherSuites();
+    String[] anonCipherSuitesSupported = getAnonCipher(supported);
 
-		System.arraycopy (anonCipherSuitesSupported, 0, newEnabled,
-			0, anonCipherSuitesSupported.length);
+    String[] newEnabled = new String[anonCipherSuitesSupported.length];
 
-		socket.setEnabledCipherSuites (newEnabled);
-	}
+    System.arraycopy(anonCipherSuitesSupported, 0, newEnabled,
+        0, anonCipherSuitesSupported.length);
+
+    socket.setEnabledCipherSuites(newEnabled);
+  }
 };
